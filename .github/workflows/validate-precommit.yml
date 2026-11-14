@@ -1,4 +1,4 @@
-name: validate
+name: validate-precommit
 
 on:
   pull_request:
@@ -16,7 +16,7 @@ permissions:
   contents: read
 
 jobs:
-  pre-commit:
+  hooks:
     name: validate pre-commit config
     runs-on: ubuntu-latest
     steps:

@@ -1,4 +1,4 @@
-name: validate
+name: validate-renovate
 
 on:
   pull_request:
@@ -7,7 +7,7 @@ on:
       - .github/workflows/validate-renovate.yml
 
 jobs:
-  renovate-config:
+  config:
     name: validate renovate config
     runs-on: ubuntu-latest
     container:

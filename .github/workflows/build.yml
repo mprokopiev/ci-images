@@ -1,5 +1,4 @@
-name: build
-run-name: ${{ github.actor }} builds images
+name: build-images
 
 on:
   push:
@@ -20,7 +19,7 @@ env:
   APP_ICON: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/github.svg
 
 jobs:
-  build-image:
+  build-and-push:
     name: build image ${{ matrix.image }}
     runs-on: ubuntu-latest
     strategy:
