@@ -1,4 +1,4 @@
-name: validate-renovate
+name: validate
 
 on:
   pull_request:
@@ -8,6 +8,7 @@ on:
 
 jobs:
   renovate-config:
+    name: validate renovate config
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/renovatebot/renovate:44.239.1

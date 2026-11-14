@@ -21,6 +21,7 @@ env:
 
 jobs:
   build-image:
+    name: build image ${{ matrix.image }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
