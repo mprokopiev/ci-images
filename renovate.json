@@ -1,0 +1,28 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    "helpers:pinGitHubActionDigestsToSemver",
+    "docker:pinDigests",
+    ":configMigration",
+    "schedule:weekly"
+  ],
+  "packageRules": [
+    {
+      "description": "Keep nixpkgs separate: a flake.lock bump changes the whole dev shell",
+      "matchManagers": [
+        "nix"
+      ],
+      "groupName": "nix flake"
+    },
+    {
+      "matchUpdateTypes": [
+        "pin",
+        "digest",
+        "patch",
+        "minor"
+      ],
+      "automerge": true
+    }
+  ]
+}
