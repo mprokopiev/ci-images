@@ -1,0 +1,18 @@
+name: validate-renovate
+
+on:
+  pull_request:
+    paths:
+      - renovate.json
+      - .github/workflows/validate-renovate.yml
+
+jobs:
+  renovate-config:
+    runs-on: ubuntu-latest
+    container: ghcr.io/renovatebot/renovate:44.239.1
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Validate renovate.json config
+        run: renovate-config-validator

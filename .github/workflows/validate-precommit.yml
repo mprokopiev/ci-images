@@ -1,0 +1,32 @@
+name: validate-precommit
+
+on:
+  pull_request:
+    paths:
+      - .pre-commit-config.yaml
+      - .hadolint.yaml
+      - .yamllint.yml
+      - flake.lock
+      - flake.nix
+      - justfile
+      - .github/workflows/validate-precommit.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  pre-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v31
+
+      - name: Check flake
+        run: nix flake check
+
+      - name: Run pre-commit
+        run: nix develop --command pre-commit run --all-files

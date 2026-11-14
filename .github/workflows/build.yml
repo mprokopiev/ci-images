@@ -1,0 +1,104 @@
+name: build
+run-name: ${{ github.actor }} builds images
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - images/**
+      - .github/workflows/build.yml
+  schedule:
+    - cron: "0 3 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  REGISTRY: ghcr.io
+  APP_ICON: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/github.svg
+
+jobs:
+  build-image:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - image: worker
+            context: images/worker
+            description: Alpine CI job container
+          - image: void-builder
+            context: images/void-builder
+            description: Void Linux xbps-src builder
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Login to GHCR
+        uses: docker/login-action@v4
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Docker metadata
+        id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: ${{ env.REGISTRY }}/${{ github.repository }}/${{ matrix.image }}
+          tags: |
+            type=raw,value=latest
+            type=raw,value={{date 'YYYY-MM-DD'}}
+          labels: |
+            org.opencontainers.image.title=${{ matrix.image }}
+            org.opencontainers.image.description=${{ matrix.description }}
+            org.opencontainers.image.licenses=MIT
+
+      - name: Build and push
+        id: build
+        uses: docker/build-push-action@v7
+        with:
+          context: ${{ matrix.context }}
+          pull: true
+          no-cache: true
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Send notification
+        if: always()
+        env:
+          BUILD_OUTCOME: ${{ steps.build.outcome }}
+          NTFY_NOTIFICATION_URL: ${{ secrets.NTFY_NOTIFICATION_URL }}
+          RUNNER_NAME: ${{ runner.name }}
+        run: |
+          if [ -z "${NTFY_NOTIFICATION_URL}" ]; then
+            echo "::warning::NTFY_NOTIFICATION_URL is not set; skipping notification."
+            exit 0
+          fi
+          if [ "${BUILD_OUTCOME}" = "success" ]; then
+            title="Image ${{ matrix.image }} built."
+            priority="2"
+            tags="white_check_mark,${{ github.repository }}"
+            message="${RUNNER_NAME} finished building image ${{ matrix.image }}."
+          else
+            title="Failed to build image ${{ matrix.image }}."
+            priority="4"
+            tags="rotating_light,${{ github.repository }}"
+            message="${RUNNER_NAME} failed to build image ${{ matrix.image }}."
+          fi
+          curl -sS --fail \
+            -H "Title: ${title}" \
+            -H "Priority: ${priority}" \
+            -H "Icon: ${APP_ICON}" \
+            -H "Tags: ${tags}" \
+            -H "Actions: view,Open repository,${{ github.server_url }}/${{ github.repository }},clear=false;\
+              view,Open workflow run,${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }},clear=false" \
+            -d "${message}" \
+            "${NTFY_NOTIFICATION_URL}" \
+            || echo "::warning::ntfy notification failed."
