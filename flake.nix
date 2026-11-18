@@ -20,7 +20,6 @@
             hadolint
             just
             nixfmt
-            nodejs
             pre-commit
             yamllint
           ];
