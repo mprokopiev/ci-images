@@ -6,7 +6,6 @@
     "helpers:pinGitHubActionDigestsToSemver"
   ],
   "automerge": true,
-  "platformAutomerge": false,
   "pre-commit": {
     "enabled": true
   },
