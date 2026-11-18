@@ -1,23 +1,17 @@
-name: validate-precommit
+name: build-flake
 
 on:
+  push:
+    branches: [main]
   pull_request:
-    paths:
-      - .pre-commit-config.yaml
-      - .hadolint.yaml
-      - .yamllint.yml
-      - flake.lock
-      - flake.nix
-      - justfile
-      - .github/workflows/validate-precommit.yml
   workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  hooks:
-    name: validate pre-commit config
+  dev-shell:
+    name: build nix dev shell
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -28,6 +22,9 @@ jobs:
 
       - name: Check flake
         run: nix flake check
+
+      - name: Build dev shell
+        run: nix build --no-link .#devShells.x86_64-linux.default
 
       - name: Run pre-commit
         run: nix develop --command pre-commit run --all-files
