@@ -1,7 +1,7 @@
 ARG BETTERLEAKS_VERSION=v1.10.1
 ARG JUST_VERSION=1.59.0
 FROM ghcr.io/betterleaks/betterleaks:${BETTERLEAKS_VERSION} AS betterleaks
-FROM ghcr.io/casey/just:${JUST_VERSION} as just
+FROM ghcr.io/casey/just:${JUST_VERSION} AS just
 FROM docker.io/alpine:3.24
 RUN apk upgrade --no-cache \
     && apk add --no-cache \
