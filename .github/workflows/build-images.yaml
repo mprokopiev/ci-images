@@ -5,7 +5,7 @@ on:
     branches: [main]
     paths:
       - images/**
-      - .github/workflows/build.yml
+      - .github/workflows/build-images.yaml
   schedule:
     - cron: "0 3 * * 1"
   workflow_dispatch:
