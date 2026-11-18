@@ -56,9 +56,7 @@
     {
       "description": "Renovate itself: weekly, grouped",
       "matchPackageNames": [
-        "ghcr.io/renovatebot/renovate",
-        "renovatebot/pre-commit-hooks",
-        "renovatebot/github-action"
+        "renovatebot/pre-commit-hooks"
       ],
       "matchUpdateTypes": [
         "minor",
