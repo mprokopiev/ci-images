@@ -1,27 +1,76 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "description": "Renovate config. Automerge is on; each rule below carves out an exception.",
   "extends": [
-    "config:recommended",
-    "helpers:pinGitHubActionDigestsToSemver",
-    "docker:pinDigests",
-    ":configMigration",
-    "schedule:weekly"
+    "config:best-practices",
+    "helpers:pinGitHubActionDigestsToSemver"
   ],
+  "automerge": true,
+  "platformAutomerge": false,
+  "pre-commit": {
+    "enabled": true
+  },
+  "nix": {
+    "enabled": true
+  },
   "packageRules": [
     {
-      "description": "Keep nixpkgs separate: a flake.lock bump changes the whole dev shell",
+      "description": "Majors always need a human",
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "automerge": false
+    },
+    {
+      "description": "Flake inputs move the whole dev shell: grouped and manual",
       "matchManagers": [
         "nix"
       ],
-      "groupName": "nix flake"
+      "groupName": "nix flake",
+      "automerge": false
     },
     {
-      "matchUpdateTypes": [
-        "pin",
-        "digest",
-        "patch",
-        "minor"
+      "description": "Actions are manual by default",
+      "matchManagers": [
+        "github-actions"
       ],
+      "automerge": false
+    },
+    {
+      "description": "Official actions are trusted upstream",
+      "matchManagers": [
+        "github-actions"
+      ],
+      "matchPackageNames": [
+        "actions/*"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch",
+        "pin",
+        "pinDigest",
+        "digest"
+      ],
+      "automerge": true
+    },
+    {
+      "description": "Renovate itself: weekly, grouped",
+      "matchPackageNames": [
+        "ghcr.io/renovatebot/renovate",
+        "renovatebot/pre-commit-hooks",
+        "renovatebot/github-action"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch",
+        "digest",
+        "pin",
+        "pinDigest"
+      ],
+      "extends": [
+        "schedule:weekly"
+      ],
+      "groupName": "renovate",
       "automerge": true
     }
   ]
