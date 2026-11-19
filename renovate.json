@@ -36,12 +36,13 @@
       "automerge": false
     },
     {
-      "description": "Official actions are trusted upstream",
+      "description": "Official and Docker actions are trusted upstream",
       "matchManagers": [
         "github-actions"
       ],
       "matchPackageNames": [
-        "actions/*"
+        "actions/*",
+        "docker/*"
       ],
       "matchUpdateTypes": [
         "minor",
