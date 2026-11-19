@@ -20,8 +20,42 @@ jobs:
         include:
           - image: worker
             context: images/worker
+            smoke: |
+              . /etc/os-release
+              printf 'os: %s%s\n' "$PRETTY_NAME" "${VERSION_ID:+ $VERSION_ID}"
+              ldd --version 2>&1 | head -2 || :
+              betterleaks version
+              just --version
+              flyctl version
+              step version
+              python3 --version
+              python3 -c 'import ssl, json'
+              node --version
+              npm --version
+              age --version
+              sops --version
+              yamllint --version
+              docker --version
+              docker compose version
+              docker buildx version
+              jq --version
+              yq --version
+              git --version
           - image: void-builder
             context: images/void-builder
+            smoke: |
+              . /etc/os-release
+              printf 'os: %s%s\n' "$PRETTY_NAME" "${VERSION_ID:+ $VERSION_ID}"
+              ldd --version 2>&1 | head -2 || :
+              bash --version | head -1
+              git --version
+              curl --version | head -1
+              xbps-query -V
+              tar --version | head -1
+              xz --version | head -1
+              zstd --version
+              gcc --version | head -1
+              make --version | head -1
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -53,3 +87,16 @@ jobs:
           pull: true
           no-cache: true
           push: false
+          load: true
+          tags: ci-smoke/${{ matrix.image }}:${{ github.run_id }}
+
+      - name: Smoke test binaries
+        env:
+          IMAGE: ci-smoke/${{ matrix.image }}:${{ github.run_id }}
+          SMOKE: ${{ matrix.smoke }}
+        run: |
+          set -o pipefail
+          echo "### ${{ matrix.image }}" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          docker run --rm --entrypoint bash "$IMAGE" -euxo pipefail -c "$SMOKE" 2>&1 | tee -a "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
